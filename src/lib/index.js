@@ -7,36 +7,42 @@ const Book = (props) => {
   useEffect(() => {
     const getBookMaterials = (urlMap) => {
       const materialNames = ["edge", "spine", "top", "bottom", "front", "back"];
-      return materialNames.map(
-        (name) =>
-          new THREE.MeshLambertMaterial(
-            urlMap[name] ? { map: loader.load(urlMap[name]) } : 0xfffff
-          )
-      );
+      return materialNames.map((name) => {
+        if (!urlMap[name]) return new THREE.MeshBasicMaterial(0xffffff);
+        const texture = new THREE.TextureLoader().load(urlMap[name]);
+        texture.generateMipmaps = false;
+        texture.minFilter = THREE.LinearFilter;
+        texture.needsUpdate = true;
+        return new THREE.MeshBasicMaterial({ map: texture });
+      });
     };
 
     const refCurrent = mountRef.current;
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      props.width / props.height,
-      0.1,
-      1000
-    );
+    scene.background = new THREE.Color(props.style.background);
+    const aspect = props.style.width / props.style.height;
+    const camera = new THREE.PerspectiveCamera(70, aspect, 1, 1000);
     const renderer = new THREE.WebGLRenderer();
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    renderer.setSize(props.width, props.height);
+    const planeGeometry = new THREE.PlaneGeometry(500, 500, 32, 32);
+    const planeMaterial = new THREE.ShadowMaterial();
+    planeMaterial.opacity = 0.5;
+
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.receiveShadow = true;
+    scene.add(plane);
+
+    renderer.setSize(props.style.width, props.style.height);
 
     mountRef.current.appendChild(renderer.domElement);
 
-    const ambient = new THREE.AmbientLight(0x222222);
-    scene.add(ambient);
-
-    const light = new THREE.DirectionalLight(0xffffff);
-    light.position.set(0, 0, 6);
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(-10, 10, 10);
+    light.castShadow = true;
     scene.add(light);
 
-    const loader = new THREE.TextureLoader();
     const urlMap = {
       front:
         "https://image.aladin.co.kr/product/24790/62/cover500/k392732321_1.jpg",
@@ -46,27 +52,62 @@ const Book = (props) => {
     };
     const geometry = new THREE.BoxGeometry(3.5, 5, 0.5);
     const cube = new THREE.Mesh(geometry, getBookMaterials(urlMap));
-
+    cube.castShadow = true;
+    cube.position.x = 0;
+    cube.position.y = 0;
+    cube.position.z = 0;
     scene.add(cube);
-    camera.position.z = 6;
+
+    camera.position.z = 3;
+    camera.position.x = -5;
+    let isMouseOver = false;
+
+    const helper = new THREE.CameraHelper(light.shadow.camera);
+    scene.add(helper);
+
+    mountRef.current.addEventListener("mouseover", () => (isMouseOver = true));
+    mountRef.current.addEventListener(
+      "mouseleave",
+      () => (isMouseOver = false)
+    );
+
+    let degrees = 90;
+    const dist = camera.position.distanceTo(cube.position);
+
+    const rotate = () => {
+      if (degrees < 135) {
+        degrees += 2;
+        const radian = degrees * (Math.PI / 180);
+        camera.position.x = Math.cos(radian) * dist;
+        camera.position.z = Math.sin(radian) * dist;
+      }
+    };
+
+    const recover = () => {
+      if (degrees > 90) {
+        degrees -= 2;
+        const radian = degrees * (Math.PI / 180);
+        camera.position.x = Math.cos(radian) * dist;
+        camera.position.z = Math.sin(radian) * dist;
+      }
+    };
 
     const animate = function () {
       requestAnimationFrame(animate);
-      mountRef.current.addEventListener("mouseover", () => {
-        cube.rotation.y += 0.01;
-      });
 
+      if (isMouseOver) rotate();
+      else recover();
+      camera.lookAt(scene.position);
       renderer.render(scene, camera);
     };
 
     animate();
 
     return () => {
-      refCurrent.removeEventListener("mouseover");
       refCurrent.removeChild(renderer.domElement);
     };
   }, [props]);
 
-  return <div ref={mountRef} />;
+  return <div ref={mountRef} style={props.style} />;
 };
 export default Book;
