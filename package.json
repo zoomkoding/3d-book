@@ -1,6 +1,6 @@
 {
   "name": "3d-book",
-  "version": "0.1.7",
+  "version": "0.1.9",
   "description": "React book component created by three.js",
   "author": "zoomkoding <zoomkoding@gmail.com>",
   "private": false,
@@ -24,13 +24,14 @@
   "license": "MIT",
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-scripts": "4.0.3",
-    "three": "^0.131.1"
+    "@babel/preset-react": "^7.14.5",
+    "@testing-library/jest-dom": "^5.14.1",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
+    "core-js": "^2.6.12",
+    "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "react-scripts start",
     "build": "rm -rf dist && NODE_ENV=production babel src/lib --out-dir dist --copy-files"
   },
   "eslintConfig": {
