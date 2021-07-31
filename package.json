@@ -1,6 +1,6 @@
 {
   "name": "3d-book",
-  "version": "0.1.10",
+  "version": "0.2.0",
   "description": "React book component created by three.js",
   "author": "zoomkoding <zoomkoding@gmail.com>",
   "license": "MIT",
