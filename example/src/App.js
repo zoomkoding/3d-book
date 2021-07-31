@@ -8,9 +8,9 @@ const App = () => {
       <Book
         style={{ width: 500, height: 600, background: 'white' }}
         bookCovers={{
-          front: '/images/front.jpeg',
-          back: '/images/back.jpeg',
-          spine: '/images/spine.jpeg'
+          front: '/3d-book/images/front.jpeg',
+          back: '/3d-book/images/back.jpeg',
+          spine: '/3d-book/images/spine.jpeg'
         }}
       />
       <h2>
